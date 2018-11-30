@@ -10,7 +10,7 @@ import java.io.*
 import kotlin.coroutines.*
 import kotlin.test.*
 
-class SuppresionTests : TestBase() {
+class SuppressionTests : TestBase() {
 
     @Test
     fun testCancellationTransparency() = runTest {

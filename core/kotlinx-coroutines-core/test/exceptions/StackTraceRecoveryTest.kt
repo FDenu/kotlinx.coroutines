@@ -41,7 +41,7 @@ class StackTraceRecoveryTest : TestBase() {
                     "\tat kotlinx.coroutines.exceptions.StackTraceRecoveryTest\$testAsync\$1\$1\$1.invokeSuspend(StackTraceRecoveryTest.kt:21)\n" +
                     "\tat kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:32)\n"
         )
-        nestedMethod(deferred, traces)
+        nestedMethod(deferred, *traces.toTypedArray())
         deferred.join()
     }
 
@@ -64,20 +64,20 @@ class StackTraceRecoveryTest : TestBase() {
                     "\tat kotlinx.coroutines.exceptions.StackTraceRecoveryTest\$testCompletedAsync\$1\$deferred\$1.invokeSuspend(StackTraceRecoveryTest.kt:44)\n" +
                     "\tat kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:32)"
         )
-        nestedMethod(deferred, stacktrace)
+        nestedMethod(deferred, *stacktrace.toTypedArray())
     }
 
-    private suspend fun nestedMethod(deferred: Deferred<*>, traces: List<String>) {
-        oneMoreNestedMethod(deferred, traces)
+    private suspend fun nestedMethod(deferred: Deferred<*>, vararg traces: String) {
+        oneMoreNestedMethod(deferred, *traces)
         assertTrue(true) // Prevent tail-call optimization
     }
 
-    private suspend fun oneMoreNestedMethod(deferred: Deferred<*>, traces: List<String>) {
+    private suspend fun oneMoreNestedMethod(deferred: Deferred<*>, vararg traces: String) {
         try {
             deferred.await()
             expectUnreached()
         } catch (e: ExecutionException) {
-            verifyStackTrace(e, traces)
+            verifyStackTrace(e, *traces)
         }
     }
 
@@ -91,7 +91,7 @@ class StackTraceRecoveryTest : TestBase() {
 
         expect(1)
         channelNestedMethod(
-            channel, listOf(
+            channel,
                 "java.lang.IllegalArgumentException\n" +
                         "\tat kotlinx.coroutines.exceptions.StackTraceRecoveryTest\$testReceiveFromChannel\$1\$job\$1.invokeSuspend(StackTraceRecoveryTest.kt:93)\n" +
                         "\t(Current coroutine stacktrace)\n" +
@@ -100,9 +100,7 @@ class StackTraceRecoveryTest : TestBase() {
                 "Caused by: java.lang.IllegalArgumentException\n" +
                         "\tat kotlinx.coroutines.exceptions.StackTraceRecoveryTest\$testReceiveFromChannel\$1\$job\$1.invokeSuspend(StackTraceRecoveryTest.kt:93)\n" +
                         "\tat kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:32)\n" +
-                        "\tat kotlinx.coroutines.DispatchedTask.run(Dispatched.kt:152)"
-            )
-        )
+                        "\tat kotlinx.coroutines.DispatchedTask.run(Dispatched.kt:152)")
         expect(3)
         job.join()
         finish(4)
@@ -113,7 +111,7 @@ class StackTraceRecoveryTest : TestBase() {
         val channel = Channel<Int>()
         channel.close(IllegalArgumentException())
         channelNestedMethod(
-            channel, listOf(
+            channel,
                 "java.lang.IllegalArgumentException\n" +
                         "\t(Current coroutine stacktrace)\n" +
                         "\tat kotlinx.coroutines.channels.AbstractChannel.receiveResult(AbstractChannel.kt:574)\n" +
@@ -121,17 +119,15 @@ class StackTraceRecoveryTest : TestBase() {
                         "\tat kotlinx.coroutines.exceptions.StackTraceRecoveryTest.channelNestedMethod(StackTraceRecoveryTest.kt:117)\n" +
                         "\tat kotlinx.coroutines.exceptions.StackTraceRecoveryTest\$testReceiveFromClosedChannel\$1.invokeSuspend(StackTraceRecoveryTest.kt:111)\n",
                 "Caused by: java.lang.IllegalArgumentException\n" +
-                        "\tat kotlinx.coroutines.exceptions.StackTraceRecoveryTest\$testReceiveFromClosedChannel\$1.invokeSuspend(StackTraceRecoveryTest.kt:110)"
-            )
-        )
+                        "\tat kotlinx.coroutines.exceptions.StackTraceRecoveryTest\$testReceiveFromClosedChannel\$1.invokeSuspend(StackTraceRecoveryTest.kt:110)")
     }
 
-    private suspend fun channelNestedMethod(channel: Channel<Int>, traces: List<String>) {
+    private suspend fun channelNestedMethod(channel: Channel<Int>, vararg traces: String) {
         try {
             channel.receive()
             expectUnreached()
         } catch (e: IllegalArgumentException) {
-            verifyStackTrace(e, traces)
+            verifyStackTrace(e, *traces)
         }
     }
 
@@ -141,7 +137,7 @@ class StackTraceRecoveryTest : TestBase() {
             throw RecoverableTestException()
         }
 
-        outerMethod(deferred, listOf(
+        outerMethod(deferred,
             "kotlinx.coroutines.RecoverableTestException\n" +
                 "\tat kotlinx.coroutines.exceptions.StackTraceRecoveryTest\$testWithContext\$1\$deferred\$1.invokeSuspend(StackTraceRecoveryTest.kt:143)\n" +
                 "\t(Current coroutine stacktrace)\n" +
@@ -152,23 +148,23 @@ class StackTraceRecoveryTest : TestBase() {
                 "\tat kotlinx.coroutines.exceptions.StackTraceRecoveryTest\$testWithContext\$1.invokeSuspend(StackTraceRecoveryTest.kt:141)\n",
             "Caused by: kotlinx.coroutines.RecoverableTestException\n" +
                 "\tat kotlinx.coroutines.exceptions.StackTraceRecoveryTest\$testWithContext\$1\$deferred\$1.invokeSuspend(StackTraceRecoveryTest.kt:143)\n" +
-                "\tat kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:32)\n"))
+                "\tat kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:32)\n")
         deferred.join()
     }
 
-    private suspend fun outerMethod(deferred: Deferred<Nothing>, traces: List<String>) {
+    private suspend fun outerMethod(deferred: Deferred<Nothing>, vararg traces: String) {
         withContext(Dispatchers.IO) {
-            innerMethod(deferred, traces)
+            innerMethod(deferred, *traces)
         }
 
         assertTrue(true)
     }
 
-    private suspend fun innerMethod(deferred: Deferred<Nothing>, traces: List<String>) {
+    private suspend fun innerMethod(deferred: Deferred<Nothing>, vararg traces: String) {
         try {
             deferred.await()
         } catch (e: RecoverableTestException) {
-            verifyStackTrace(e, traces)
+            verifyStackTrace(e, *traces)
         }
     }
 
@@ -178,7 +174,7 @@ class StackTraceRecoveryTest : TestBase() {
             throw RecoverableTestException()
         }
 
-        outerScopedMethod(deferred, listOf(
+        outerScopedMethod(deferred,
             "kotlinx.coroutines.RecoverableTestException\n" +
                     "\tat kotlinx.coroutines.exceptions.StackTraceRecoveryTest\$testCoroutineScope\$1\$deferred\$1.invokeSuspend(StackTraceRecoveryTest.kt:143)\n" +
                     "\t(Current coroutine stacktrace)\n" +
@@ -188,55 +184,12 @@ class StackTraceRecoveryTest : TestBase() {
                     "\tat kotlinx.coroutines.exceptions.StackTraceRecoveryTest\$testCoroutineScope\$1.invokeSuspend(StackTraceRecoveryTest.kt:141)\n",
             "Caused by: kotlinx.coroutines.RecoverableTestException\n" +
                     "\tat kotlinx.coroutines.exceptions.StackTraceRecoveryTest\$testCoroutineScope\$1\$deferred\$1.invokeSuspend(StackTraceRecoveryTest.kt:143)\n" +
-                    "\tat kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:32)\n"))
+                    "\tat kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:32)\n")
         deferred.join()
     }
 
-    private suspend fun outerScopedMethod(deferred: Deferred<Nothing>, traces: List<String>) = coroutineScope {
-        innerMethod(deferred, traces)
+    private suspend fun outerScopedMethod(deferred: Deferred<Nothing>, vararg traces: String) = coroutineScope {
+        innerMethod(deferred, *traces)
         assertTrue(true)
     }
-
-    private fun verifyStackTrace(e: Throwable, traces: List<String>) {
-        val stacktrace = toStackTrace(e)
-        traces.forEach {
-            assertTrue(
-                stacktrace.trimStackTrace().contains(it.trimStackTrace()),
-                "\nExpected trace element:\n$it\n\nActual stacktrace:\n$stacktrace"
-            )
-        }
-
-        val causes = stacktrace.count("Caused by")
-        assertNotEquals(0, causes)
-        assertEquals(traces.map { it.count("Caused by") }.sum(), causes)
-    }
-
-    private fun toStackTrace(t: Throwable): String {
-        val sw = StringWriter() as Writer
-        t.printStackTrace(PrintWriter(sw))
-        return sw.toString()
-    }
-
-    private fun String.trimStackTrace(): String {
-        return applyBackspace(trimIndent().replace(Regex(":[0-9]+"), "")
-            .replace("kotlinx_coroutines_core_main", "") // yay source sets
-            .replace("kotlinx_coroutines_core", ""))
-    }
-
-    private fun applyBackspace(line: String): String {
-        val array = line.toCharArray()
-        val stack = CharArray(array.size)
-        var stackSize = -1
-        for (c in array) {
-            if (c != '\b') {
-                stack[++stackSize] = c
-            } else {
-                --stackSize
-            }
-        }
-
-        return String(stack, 0, stackSize)
-    }
-
-    private fun String.count(substring: String): Int = split(substring).size - 1
 }
