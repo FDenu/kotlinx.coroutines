@@ -38,20 +38,21 @@ class StackTraceRecoveryNestedChannelsTest : TestBase() {
         } catch (e: Exception) {
             verifyStackTrace(e,
                 "kotlinx.coroutines.RecoverableTestException\n" +
-                    "\t(Current coroutine stacktrace)\n" +
+                    "\tat kotlinx.coroutines.exceptions.StackTraceRecoveryNestedChannelsTest\$testOfferWithCurrentContext\$1.invokeSuspend(StackTraceRecoveryNestedChannelsTest.kt:34)\n" +
+                    "\t(Coroutine boundary)\n" +
                     "\tat kotlinx.coroutines.channels.AbstractSendChannel.offer(AbstractChannel.kt:180)\n" +
                     "\tat kotlinx.coroutines.channels.AbstractSendChannel.send(AbstractChannel.kt:168)\n" +
                     "\tat kotlinx.coroutines.exceptions.StackTraceRecoveryNestedChannelsTest.sendInChannel(StackTraceRecoveryNestedChannelsTest.kt:24)\n" +
                     "\tat kotlinx.coroutines.exceptions.StackTraceRecoveryNestedChannelsTest\$sendWithContext\$2.invokeSuspend(StackTraceRecoveryNestedChannelsTest.kt:19)\n" +
                     "\tat kotlinx.coroutines.exceptions.StackTraceRecoveryNestedChannelsTest\$sendWithContext\$2.invoke(StackTraceRecoveryNestedChannelsTest.kt)\n" +
-                    "\tat kotlinx.coroutines.intrinsics.UndispatchedKt.startUndispatchedOrReturn(Undispatched.kt:84)\n" +
+                    "\tat kotlinx.coroutines.intrinsics.UndispatchedKt.startUndispatchedOrReturn(Undispatched.kt:85)\n" +
                     "\tat kotlinx.coroutines.BuildersKt__Builders_commonKt.withContext(Builders.common.kt:146)\n" +
                     "\tat kotlinx.coroutines.BuildersKt.withContext(Unknown Source)\n" +
                     "\tat kotlinx.coroutines.exceptions.StackTraceRecoveryNestedChannelsTest.sendWithContext(StackTraceRecoveryNestedChannelsTest.kt:18)\n" +
-                    "\tat kotlinx.coroutines.exceptions.StackTraceRecoveryNestedChannelsTest\$testOfferWithCurrentContext\$1.invokeSuspend(StackTraceRecoveryNestedChannelsTest.kt:36)\n" +
+                    "\tat kotlinx.coroutines.exceptions.StackTraceRecoveryNestedChannelsTest\$testOfferWithCurrentContext\$1.invokeSuspend(StackTraceRecoveryNestedChannelsTest.kt:37)\n" +
                 "Caused by: kotlinx.coroutines.RecoverableTestException\n" +
                     "\tat kotlinx.coroutines.exceptions.StackTraceRecoveryNestedChannelsTest\$testOfferWithCurrentContext\$1.invokeSuspend(StackTraceRecoveryNestedChannelsTest.kt:33)\n" +
-                    "\tat kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:32)")
+                    "\tat kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:32)\n")
         }
     }
 
@@ -65,7 +66,7 @@ class StackTraceRecoveryNestedChannelsTest : TestBase() {
             verifyStackTrace(e,
                 "kotlinx.coroutines.RecoverableTestException\n" +
                     "\tat kotlinx.coroutines.exceptions.StackTraceRecoveryNestedChannelsTest\$testOfferWithContextWrapped\$1.invokeSuspend(StackTraceRecoveryNestedChannelsTest.kt:59)\n" +
-                    "\t(Current coroutine stacktrace)\n" +
+                    "\t(Coroutine boundary)\n" +
                     "\tat kotlinx.coroutines.channels.AbstractSendChannel.offer(AbstractChannel.kt:180)\n" +
                     "\tat kotlinx.coroutines.channels.AbstractSendChannel.send(AbstractChannel.kt:168)\n" +
                     "\tat kotlinx.coroutines.exceptions.StackTraceRecoveryNestedChannelsTest.sendInChannel(StackTraceRecoveryNestedChannelsTest.kt:24)\n" +
@@ -87,7 +88,7 @@ class StackTraceRecoveryNestedChannelsTest : TestBase() {
             verifyStackTrace(e,
                 "kotlinx.coroutines.RecoverableTestException\n" +
                     "\tat kotlinx.coroutines.exceptions.StackTraceRecoveryNestedChannelsTest\$testOfferFromScope\$1.invokeSuspend(StackTraceRecoveryNestedChannelsTest.kt:81)\n" +
-                    "\t(Current coroutine stacktrace)\n" +
+                    "\t(Coroutine boundary)\n" +
                     "\tat kotlinx.coroutines.channels.AbstractSendChannel.offer(AbstractChannel.kt:180)\n" +
                     "\tat kotlinx.coroutines.channels.AbstractSendChannel.send(AbstractChannel.kt:168)\n" +
                     "\tat kotlinx.coroutines.exceptions.StackTraceRecoveryNestedChannelsTest.sendInChannel(StackTraceRecoveryNestedChannelsTest.kt:24)\n" +
@@ -111,7 +112,7 @@ class StackTraceRecoveryNestedChannelsTest : TestBase() {
                 verifyStackTrace(e,
                     "kotlinx.coroutines.RecoverableTestException\n" +
                         "\tat kotlinx.coroutines.exceptions.StackTraceRecoveryNestedChannelsTest\$testSendFromScope\$1.invokeSuspend(StackTraceRecoveryNestedChannelsTest.kt:118)\n" +
-                        "\t(Current coroutine stacktrace)\n" +
+                        "\t(Coroutine boundary)\n" +
                         "\tat kotlinx.coroutines.channels.AbstractSendChannel.offer(AbstractChannel.kt:180)\n" +
                         "\tat kotlinx.coroutines.channels.AbstractSendChannel.send(AbstractChannel.kt:168)\n" +
                         "\tat kotlinx.coroutines.exceptions.StackTraceRecoveryNestedChannelsTest.sendInChannel(StackTraceRecoveryNestedChannelsTest.kt:24)\n" +

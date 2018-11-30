@@ -24,13 +24,13 @@ private fun <E : Throwable> E.sanitizeStackTrace(): E {
     val stackTrace = stackTrace
     val size = stackTrace.size
 
-    val lastIntrinsic = stackTrace.frameIndex("kotlinx.coroutines.internal.ExceptionsKt")
+    val lastIntrinsic = stackTrace.frameIndex("kotlinx.coroutines.internal.StackTraceRecoveryKt")
     val startIndex = lastIntrinsic + 1
     val endIndex = stackTrace.frameIndex("kotlin.coroutines.jvm.internal.BaseContinuationImpl")
     val adjustment = if (endIndex == -1) 0 else size - endIndex
     val trace = Array(size - lastIntrinsic - adjustment) {
         if (it == 0) {
-            artificialFrame("Current coroutine stacktrace")
+            artificialFrame("Coroutine boundary")
         } else {
             stackTrace[startIndex + it - 1]
         }
@@ -82,7 +82,7 @@ private fun <E : Throwable> recoverFromStackFrame(exception: E, continuation: Co
      * caused by "IllegalStateException" (original one)
      */
     // TODO optimizable allocations and passes
-    stacktrace.addFirst(artificialFrame("Current coroutine stacktrace"))
+    stacktrace.addFirst(artificialFrame("Coroutine boundary"))
     val copied = meaningfulActualStackTrace(cause)
     newException.stackTrace = (copied + stacktrace).toTypedArray()
     return newException
@@ -105,8 +105,14 @@ private fun <E : Throwable> E.causeAndStacktrace(): Pair<E, Array<StackTraceElem
 }
 
 private fun mergeRecoveredTraces(recoveredStacktrace: Array<StackTraceElement>, result: ArrayDeque<StackTraceElement>) {
+    // Merge two stacktraces and trim common prefix
     val startIndex = recoveredStacktrace.indexOfFirst { it.isArtificial() } + 1
-    for (i in (recoveredStacktrace.size - 1) downTo startIndex) {
+    val lastFrameIndex = recoveredStacktrace.size - 1
+    for (i in lastFrameIndex downTo startIndex) {
+        val element = recoveredStacktrace[i]
+        if (element.elementWiseEquals(result.last)) {
+            result.removeLast()
+        }
         result.addFirst(recoveredStacktrace[i])
     }
 }
@@ -183,6 +189,14 @@ internal fun sanitize(element: StackTraceElement): StackTraceElement {
 internal fun artificialFrame(message: String) = java.lang.StackTraceElement("\b\b\b($message", "\b", "\b", -1)
 internal fun StackTraceElement.isArtificial() = className.startsWith("\b\b\b")
 private fun Array<StackTraceElement>.frameIndex(methodName: String) = indexOfFirst { methodName == it.className }
+
+private fun StackTraceElement.elementWiseEquals(e: StackTraceElement): Boolean {
+    /*
+     * By default, STE.equals compares class-loader of enclosing class as well, which may lead to an interesting duplicates
+     * in stack traces.
+     */
+    return lineNumber == e.lineNumber && methodName == e.methodName && fileName == e.fileName
+}
 
 @Suppress("ACTUAL_WITHOUT_EXPECT")
 actual typealias CoroutineStackFrame = kotlin.coroutines.jvm.internal.CoroutineStackFrame

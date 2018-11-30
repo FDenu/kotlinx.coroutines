@@ -32,7 +32,7 @@ class StackTraceRecoveryTest : TestBase() {
         val traces = listOf(
             "java.util.concurrent.ExecutionException\n" +
                     "\tat kotlinx.coroutines.exceptions.StackTraceRecoveryTest\$testAsync\$1\$1\$1.invokeSuspend(StackTraceRecoveryTest.kt:99)\n" +
-                    "\t(Current coroutine stacktrace)\n" +
+                    "\t(Coroutine boundary)\n" +
                     "\tat kotlinx.coroutines.DeferredCoroutine.await\$suspendImpl(Builders.common.kt:99)\n" +
                     "\tat kotlinx.coroutines.exceptions.StackTraceRecoveryTest.oneMoreNestedMethod(StackTraceRecoveryTest.kt:49)\n" +
                     "\tat kotlinx.coroutines.exceptions.StackTraceRecoveryTest.nestedMethod(StackTraceRecoveryTest.kt:44)\n" +
@@ -55,7 +55,7 @@ class StackTraceRecoveryTest : TestBase() {
         val stacktrace = listOf(
             "java.util.concurrent.ExecutionException\n" +
                     "\tat kotlinx.coroutines.exceptions.StackTraceRecoveryTest\$testCompletedAsync\$1\$deferred\$1.invokeSuspend(StackTraceRecoveryTest.kt:44)\n" +
-                    "\t(Current coroutine stacktrace)\n" +
+                    "\t(Coroutine boundary)\n" +
                     "\tat kotlinx.coroutines.DeferredCoroutine.await\$suspendImpl(Builders.common.kt:99)\n" +
                     "\tat kotlinx.coroutines.exceptions.StackTraceRecoveryTest.oneMoreNestedMethod(StackTraceRecoveryTest.kt:81)\n" +
                     "\tat kotlinx.coroutines.exceptions.StackTraceRecoveryTest.nestedMethod(StackTraceRecoveryTest.kt:75)\n" +
@@ -94,7 +94,7 @@ class StackTraceRecoveryTest : TestBase() {
             channel,
                 "java.lang.IllegalArgumentException\n" +
                         "\tat kotlinx.coroutines.exceptions.StackTraceRecoveryTest\$testReceiveFromChannel\$1\$job\$1.invokeSuspend(StackTraceRecoveryTest.kt:93)\n" +
-                        "\t(Current coroutine stacktrace)\n" +
+                        "\t(Coroutine boundary)\n" +
                         "\tat kotlinx.coroutines.exceptions.StackTraceRecoveryTest.channelNestedMethod(StackTraceRecoveryTest.kt:110)\n" +
                         "\tat kotlinx.coroutines.exceptions.StackTraceRecoveryTest\$testReceiveFromChannel\$1.invokeSuspend(StackTraceRecoveryTest.kt:89)",
                 "Caused by: java.lang.IllegalArgumentException\n" +
@@ -113,7 +113,7 @@ class StackTraceRecoveryTest : TestBase() {
         channelNestedMethod(
             channel,
                 "java.lang.IllegalArgumentException\n" +
-                        "\t(Current coroutine stacktrace)\n" +
+                        "\t(Coroutine boundary)\n" +
                         "\tat kotlinx.coroutines.channels.AbstractChannel.receiveResult(AbstractChannel.kt:574)\n" +
                         "\tat kotlinx.coroutines.channels.AbstractChannel.receive(AbstractChannel.kt:567)\n" +
                         "\tat kotlinx.coroutines.exceptions.StackTraceRecoveryTest.channelNestedMethod(StackTraceRecoveryTest.kt:117)\n" +
@@ -140,7 +140,7 @@ class StackTraceRecoveryTest : TestBase() {
         outerMethod(deferred,
             "kotlinx.coroutines.RecoverableTestException\n" +
                 "\tat kotlinx.coroutines.exceptions.StackTraceRecoveryTest\$testWithContext\$1\$deferred\$1.invokeSuspend(StackTraceRecoveryTest.kt:143)\n" +
-                "\t(Current coroutine stacktrace)\n" +
+                "\t(Coroutine boundary)\n" +
                 "\tat kotlinx.coroutines.DeferredCoroutine.await\$suspendImpl(Builders.common.kt:99)\n" +
                 "\tat kotlinx.coroutines.exceptions.StackTraceRecoveryTest.innerMethod(StackTraceRecoveryTest.kt:158)\n" +
                 "\tat kotlinx.coroutines.exceptions.StackTraceRecoveryTest\$outerMethod\$2.invokeSuspend(StackTraceRecoveryTest.kt:151)\n" +
@@ -177,7 +177,7 @@ class StackTraceRecoveryTest : TestBase() {
         outerScopedMethod(deferred,
             "kotlinx.coroutines.RecoverableTestException\n" +
                     "\tat kotlinx.coroutines.exceptions.StackTraceRecoveryTest\$testCoroutineScope\$1\$deferred\$1.invokeSuspend(StackTraceRecoveryTest.kt:143)\n" +
-                    "\t(Current coroutine stacktrace)\n" +
+                    "\t(Coroutine boundary)\n" +
                     "\tat kotlinx.coroutines.DeferredCoroutine.await\$suspendImpl(Builders.common.kt:99)\n" +
                     "\tat kotlinx.coroutines.exceptions.StackTraceRecoveryTest.innerMethod(StackTraceRecoveryTest.kt:158)\n" +
                     "\tat kotlinx.coroutines.exceptions.StackTraceRecoveryTest\$outerScopedMethod\$2.invokeSuspend(StackTraceRecoveryTest.kt:151)\n" +
