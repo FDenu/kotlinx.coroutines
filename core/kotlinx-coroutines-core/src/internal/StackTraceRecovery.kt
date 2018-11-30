@@ -65,27 +65,46 @@ private fun <E : Throwable> recoverFromStackFrame(exception: E, continuation: Co
         mergeRecoveredTraces(recoveredStacktrace, stacktrace)
     }
 
-    /*
-     * Here we partially copy original exception stacktrace to make current one much prettier.
-     * E.g. for
-     * ```
-     * fun foo() = async { error(...) }
-     * suspend fun bar() = foo().await()
-     * ```
-     * we would like to produce following exception:
-     * IllegalStateException
-     *   at foo
-     *   at kotlinx.coroutines.resumeWith
-     *   (Current coroutine stacktrace)
-     *   at bar
-     *   ...real stacktrace...
-     * caused by "IllegalStateException" (original one)
-     */
-    // TODO optimizable allocations and passes
-    stacktrace.addFirst(artificialFrame("Coroutine boundary"))
-    val copied = meaningfulActualStackTrace(cause)
-    newException.stackTrace = (copied + stacktrace).toTypedArray()
-    return newException
+    // Take recovered stacktrace, merge it with existing one if necessary and return
+    return createFinalException(cause, newException, stacktrace)
+}
+
+/*
+ * Here we partially copy original exception stackTrace to make current one much prettier.
+ * E.g. for
+ * ```
+ * fun foo() = async { error(...) }
+ * suspend fun bar() = foo().await()
+ * ```
+ * we would like to produce following exception:
+ * IllegalStateException
+ *   at foo
+ *   at kotlin.coroutines.resumeWith
+ *   (Coroutine boundary)
+ *   at bar
+ *   ...real stackTrace...
+ * caused by "IllegalStateException" (original one)
+ */
+private fun <E : Throwable> createFinalException(cause: E, result: E, resultStackTrace: ArrayDeque<StackTraceElement>): E {
+    resultStackTrace.addFirst(artificialFrame("Coroutine boundary"))
+    val causeTrace = cause.stackTrace
+    val size = causeTrace.frameIndex("kotlin.coroutines.jvm.internal.BaseContinuationImpl")
+    if (size == -1) {
+        result.stackTrace = resultStackTrace.toTypedArray()
+        return result
+    }
+
+    val mergedStackTrace = arrayOfNulls<StackTraceElement>(resultStackTrace.size + size)
+    for (i in 0 until size) {
+        mergedStackTrace[i] = causeTrace[i]
+    }
+
+    for ((index, element) in resultStackTrace.withIndex()) {
+        mergedStackTrace[size + index] = element
+    }
+
+    result.stackTrace = mergedStackTrace
+    return result
 }
 
 /**
@@ -115,25 +134,6 @@ private fun mergeRecoveredTraces(recoveredStacktrace: Array<StackTraceElement>, 
         }
         result.addFirst(recoveredStacktrace[i])
     }
-}
-
-/*
- * Returns slice of the original stacktrace from the original exception.
- * E.g. for
- * at kotlinx.coroutines.PlaygroundKt.foo(PlaygroundKt.kt:14)
- * at kotlinx.coroutines.PlaygroundKt$foo$1.invokeSuspend(PlaygroundKt.kt)
- * at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:32)
- * at kotlinx.coroutines.ResumeModeKt.resumeMode(ResumeMode.kt:67)
- * at kotlinx.coroutines.DispatchedKt.resume(Dispatched.kt:277)
- * at kotlinx.coroutines.DispatchedKt.dispatch(Dispatched.kt:266)
- *
- * first two elements will be returned.
- */
-private fun <E : Throwable> meaningfulActualStackTrace(exception: E): List<StackTraceElement> {
-    val stackTrace = exception.stackTrace
-    val index = stackTrace.frameIndex("kotlin.coroutines.jvm.internal.BaseContinuationImpl")
-    if (index == -1) return emptyList()
-    return stackTrace.slice(0 until index)
 }
 
 @Suppress("NOTHING_TO_INLINE")
